@@ -1,0 +1,437 @@
+import { useMemo, useState, useEffect } from 'react'
+import { v4 as uuid } from 'uuid'
+import { supabase } from '../lib/supabase'
+import { useAuth } from '../context/AuthContext'
+import type { Trade, TradeType, Stats, AccountSettings } from '../types'
+import { calculatePips, calculateProfit, getPipValue, calculateRR } from '../utils/forexCalculations'
+import useLocalStorage from './useLocalStorage' // Keep for settings only for now
+
+export interface TradeFormData {
+  date: string
+  pair: string
+  type: TradeType
+  lotSize: string
+  entryPrice: string
+  exitPrice: string
+  stopLoss: string
+  takeProfit: string
+  pipValue: string
+  isPipValueManual: boolean
+  profitLoss: string
+  manualOverride: boolean
+  tradeResult: string
+  notes: string
+  screenshotFile?: File 
+}
+
+const DEFAULT_SETTINGS: AccountSettings = {
+  defaultCurrency: 'USD',
+  riskPercentage: 1.0,
+  theme: 'dark',
+}
+
+function useTrades() {
+  const { user } = useAuth()
+  const [trades, setTrades] = useState<Trade[]>([])
+  const [loading, setLoading] = useState(true)
+  const [settings, setSettings] = useLocalStorage<AccountSettings>('tradelog_settings', DEFAULT_SETTINGS)
+
+  // Settings Migration & Initialization
+  useEffect(() => {
+    const s = settings as any
+    if (s && s.currency && !s.defaultCurrency) {
+      setSettings({
+        ...settings,
+        defaultCurrency: s.currency,
+        riskPercentage: s.riskPercentage || 1.0,
+      })
+    } else if (s && !s.riskPercentage) {
+      setSettings({
+        ...settings,
+        riskPercentage: 1.0
+      })
+    }
+  }, [settings, setSettings])
+
+  // Fetch trades from Supabase on mount or user change
+  useEffect(() => {
+    if (!user) {
+      setTrades([])
+      setLoading(false)
+      return
+    }
+
+    const fetchTrades = async () => {
+      setLoading(true)
+      const { data, error } = await supabase
+        .from('trades')
+        .select('*')
+        .order('date', { ascending: false })
+
+      if (error) {
+        console.error('Error fetching trades:', error)
+      } else {
+        // Map snake_case to camelCase
+        const mapped: Trade[] = (data || []).map(t => ({
+          id: t.id,
+          date: t.date,
+          pair: t.pair,
+          type: t.type as TradeType,
+          lotSize: Number(t.lot_size),
+          entryPrice: Number(t.entry_price),
+          exitPrice: Number(t.exit_price),
+          stopLoss: (t.stop_loss !== null && t.stop_loss !== undefined) ? Number(t.stop_loss) : undefined,
+          takeProfit: (t.take_profit !== null && t.take_profit !== undefined) ? Number(t.take_profit) : undefined,
+          pips: Number(t.pips),
+          pipValue: Number(t.pip_value),
+          profitLoss: Number(t.profit_loss),
+          manualOverride: t.manual_override,
+          riskReward: t.risk_reward ? Number(t.risk_reward) : 0,
+          tradeResult: t.trade_result,
+          screenshot: t.screenshot_url,
+          notes: t.notes || '',
+          createdAt: t.created_at
+        }))
+        console.log('[FRONTEND] Fetched trades from Supabase:', mapped)
+        setTrades(mapped)
+      }
+      setLoading(false)
+    }
+
+    fetchTrades()
+  }, [user])
+
+  const uploadScreenshot = async (file: File): Promise<string | null> => {
+    if (!user) return null
+    
+    const fileExt = file.name.split('.').pop()
+    const fileName = `${user.id}/${uuid()}.${fileExt}`
+    
+    const { error: uploadError } = await supabase.storage
+      .from('trade-images')
+      .upload(fileName, file)
+
+    if (uploadError) {
+      console.error('Error uploading screenshot:', uploadError)
+      return null
+    }
+
+    const { data: { publicUrl } } = supabase.storage
+      .from('trade-images')
+      .getPublicUrl(fileName)
+
+    return publicUrl
+  }
+
+  const addTrade = async (form: TradeFormData): Promise<Trade | null> => {
+    if (!user) return null
+
+    const entry = parseFloat(form.entryPrice)
+    const exit = parseFloat(form.exitPrice)
+    const lots = parseFloat(form.lotSize)
+    const sl = form.stopLoss ? parseFloat(form.stopLoss) : undefined
+    const tp = form.takeProfit ? parseFloat(form.takeProfit) : undefined
+    
+    const pips = calculatePips(form.pair, entry, exit, form.type)
+    const rr = calculateRR(entry, sl, tp, form.type)
+    
+    let pipValue = parseFloat(form.pipValue)
+    if (!form.isPipValueManual) {
+      pipValue = getPipValue(form.pair, lots)
+    }
+
+    let profitLoss = parseFloat(form.profitLoss)
+    if (!form.manualOverride) {
+      profitLoss = calculateProfit(pips, pipValue)
+    }
+
+    const tradeResult = form.tradeResult || (profitLoss > 0 ? 'Win' : profitLoss < 0 ? 'Loss' : 'Breakeven')
+
+    let screenshotUrl = ''
+    if (form.screenshotFile) {
+      const uploadedUrl = await uploadScreenshot(form.screenshotFile)
+      if (uploadedUrl) screenshotUrl = uploadedUrl
+    }
+
+    const tradeData = {
+      user_id: user.id,
+      date: form.date,
+      pair: form.pair.toUpperCase().trim(),
+      type: form.type,
+      lot_size: lots,
+      entry_price: entry,
+      exit_price: exit,
+      stop_loss: sl,
+      take_profit: tp,
+      pips: pips,
+      pip_value: pipValue,
+      profit_loss: profitLoss,
+      manual_override: form.manualOverride,
+      risk_reward: rr,
+      trade_result: tradeResult,
+      screenshot_url: screenshotUrl,
+      notes: form.notes.trim(),
+    }
+
+    const { data, error } = await supabase
+      .from('trades')
+      .insert([tradeData])
+      .select()
+      .single()
+
+    if (error) {
+      console.error('Error adding trade:', error)
+      return null
+    }
+
+    const newTrade: Trade = {
+      id: data.id,
+      date: data.date,
+      pair: data.pair,
+      type: data.type as TradeType,
+      lotSize: Number(data.lot_size),
+      entryPrice: Number(data.entry_price),
+      exitPrice: Number(data.exit_price),
+      stopLoss: data.stop_loss ? Number(data.stop_loss) : undefined,
+      takeProfit: data.take_profit ? Number(data.take_profit) : undefined,
+      pips: Number(data.pips),
+      pipValue: Number(data.pip_value),
+      profitLoss: Number(data.profit_loss),
+      manualOverride: data.manual_override,
+      riskReward: Number(data.risk_reward),
+      tradeResult: data.trade_result,
+      screenshot: data.screenshot_url,
+      notes: data.notes || '',
+      createdAt: data.created_at
+    }
+
+    setTrades(prev => [newTrade, ...prev])
+    return newTrade
+  }
+
+  const updateTrade = async (id: string, form: TradeFormData) => {
+    if (!user) return
+
+    const entry = parseFloat(form.entryPrice)
+    const exit = parseFloat(form.exitPrice)
+    const lots = parseFloat(form.lotSize)
+    const sl = form.stopLoss ? parseFloat(form.stopLoss) : undefined
+    const tp = form.takeProfit ? parseFloat(form.takeProfit) : undefined
+    
+    const pips = calculatePips(form.pair, entry, exit, form.type)
+    const rr = calculateRR(entry, sl, tp, form.type)
+    
+    let pipValue = parseFloat(form.pipValue)
+    if (!form.isPipValueManual) {
+      pipValue = getPipValue(form.pair, lots)
+    }
+
+    let profitLoss = parseFloat(form.profitLoss)
+    if (!form.manualOverride) {
+      profitLoss = calculateProfit(pips, pipValue)
+    }
+
+    const tradeResult = form.tradeResult || (profitLoss > 0 ? 'Win' : profitLoss < 0 ? 'Loss' : 'Breakeven')
+
+    let screenshotUrl = undefined
+    if (form.screenshotFile) {
+      const uploadedUrl = await uploadScreenshot(form.screenshotFile)
+      if (uploadedUrl) screenshotUrl = uploadedUrl
+    }
+
+    const updateData: any = {
+      date: form.date,
+      pair: form.pair.toUpperCase().trim(),
+      type: form.type,
+      lot_size: lots,
+      entry_price: entry,
+      exit_price: exit,
+      stop_loss: sl,
+      take_profit: tp,
+      pips: pips,
+      pip_value: pipValue,
+      profit_loss: profitLoss,
+      manual_override: form.manualOverride,
+      risk_reward: rr,
+      trade_result: tradeResult,
+      notes: form.notes.trim()
+    }
+
+    if (screenshotUrl) {
+      updateData.screenshot_url = screenshotUrl
+    }
+
+    const { error } = await supabase
+      .from('trades')
+      .update(updateData)
+      .eq('id', id)
+
+    if (error) {
+      console.error('Error updating trade:', error)
+      return
+    }
+
+    setTrades(prev => prev.map(t =>
+      t.id === id
+        ? { 
+            ...t, 
+            ...updateData,
+            lotSize: lots,
+            entryPrice: entry,
+            exitPrice: exit,
+            stopLoss: sl,
+            takeProfit: tp,
+            pips,
+            pipValue,
+            profitLoss,
+            manualOverride: form.manualOverride,
+            riskReward: rr,
+            tradeResult,
+            screenshot: screenshotUrl || t.screenshot,
+            notes: form.notes.trim()
+          }
+        : t
+    ))
+  }
+
+  const deleteTrade = async (id: string) => {
+    if (!user) return
+    const { error } = await supabase
+      .from('trades')
+      .delete()
+      .eq('id', id)
+
+    if (error) {
+      console.error('Error deleting trade:', error)
+      return
+    }
+    setTrades(prev => prev.filter(t => t.id !== id))
+  }
+
+  const importTrades = async (newTrades: Partial<Trade>[]) => {
+    if (!user) return
+
+    const tradesToInsert = newTrades.map(t => ({
+      user_id: user.id,
+      date: t.date,
+      pair: t.pair?.toUpperCase().trim(),
+      type: t.type,
+      lot_size: t.lotSize,
+      entry_price: t.entryPrice,
+      exit_price: t.exitPrice,
+      stop_loss: t.stopLoss,
+      take_profit: t.takeProfit,
+      pips: t.pips || 0,
+      pip_value: t.pipValue || 0,
+      profit_loss: t.profitLoss || 0,
+      manual_override: t.manualOverride ?? true,
+      risk_reward: t.riskReward || 0,
+      trade_result: t.tradeResult || (t.profitLoss && t.profitLoss > 0 ? 'Win' : 'Loss'),
+      notes: t.notes || 'Imported',
+    }))
+
+    const { data, error } = await supabase
+      .from('trades')
+      .insert(tradesToInsert)
+      .select()
+
+    if (error) {
+      console.error('Error importing trades:', error)
+      return
+    }
+
+    if (data) {
+      const mapped: Trade[] = data.map(t => ({
+        id: t.id,
+        date: t.date,
+        pair: t.pair,
+        type: t.type as TradeType,
+        lotSize: Number(t.lot_size),
+        entryPrice: Number(t.entry_price),
+        exitPrice: Number(t.exit_price),
+        stopLoss: t.stop_loss ? Number(t.stop_loss) : undefined,
+        takeProfit: t.take_profit ? Number(t.take_profit) : undefined,
+        pips: Number(t.pips),
+        pipValue: Number(t.pip_value),
+        profitLoss: Number(t.profit_loss),
+        manualOverride: t.manual_override,
+        riskReward: t.risk_reward ? Number(t.risk_reward) : 0,
+        tradeResult: t.trade_result,
+        screenshot: t.screenshot_url,
+        notes: t.notes || '',
+        createdAt: t.created_at
+      }))
+      setTrades(prev => [...mapped, ...prev])
+    }
+  }
+
+  const clearAllTrades = async () => {
+    if (!user) return
+    if (window.confirm('Are you sure you want to delete ALL trades? This cannot be undone.')) {
+      const { error } = await supabase
+        .from('trades')
+        .delete()
+        .eq('user_id', user.id)
+
+      if (error) {
+        console.error('Error clearing trades:', error)
+      } else {
+        setTrades([])
+      }
+    }
+  }
+
+  const stats = useMemo((): Stats => {
+    const total = trades.length
+    const winningTrades = trades.filter(t => t.profitLoss > 0)
+    const losingTrades = trades.filter(t => t.profitLoss < 0)
+    
+    const wins = winningTrades.length
+    const losses = losingTrades.length
+    
+    const totalProfitLoss = trades.reduce((sum, t) => sum + (t.profitLoss || 0), 0)
+    const totalPips = trades.reduce((sum, t) => sum + (t.pips || 0), 0)
+    
+    const avgWin = wins > 0 ? winningTrades.reduce((sum, t) => sum + t.profitLoss, 0) / wins : 0
+    const avgLoss = losses > 0 ? Math.abs(losingTrades.reduce((sum, t) => sum + t.profitLoss, 0) / losses) : 0
+    
+    const rrTotal = trades.reduce((sum, t) => sum + (t.riskReward || 0), 0)
+    const rrAvg = total > 0 ? rrTotal / total : 0
+
+    let maxPnl = 0
+    let currentPnlSum = 0
+    let maxDd = 0
+    
+    const sortedTrades = [...trades].sort((a, b) => a.date.localeCompare(b.date))
+    sortedTrades.forEach(t => {
+      currentPnlSum += t.profitLoss
+      if (currentPnlSum > maxPnl) maxPnl = currentPnlSum
+      const dd = maxPnl > 0 ? (maxPnl - currentPnlSum) / maxPnl * 100 : 0
+      if (dd > maxDd) maxDd = dd
+    })
+
+    const pnlValues = trades.map(t => t.profitLoss || 0)
+    const bestTrade = pnlValues.length > 0 ? Math.max(...pnlValues) : 0
+    const worstTrade = pnlValues.length > 0 ? Math.min(...pnlValues) : 0
+
+    return {
+      totalTrades: total,
+      wins,
+      losses,
+      winRate: total > 0 ? Math.round((wins / total) * 100) : 0,
+      totalProfitLoss,
+      totalPips,
+      avgProfitLoss: total > 0 ? totalProfitLoss / total : 0,
+      avgWin,
+      avgLoss,
+      rrAvg,
+      maxDrawdown: parseFloat(maxDd.toFixed(2)),
+      bestTrade,
+      worstTrade
+    }
+  }, [trades])
+
+  return { trades, settings, setSettings, addTrade, updateTrade, deleteTrade, importTrades, clearAllTrades, stats, loading }
+}
+
+export default useTrades
