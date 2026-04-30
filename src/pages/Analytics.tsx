@@ -106,7 +106,6 @@ const Analytics: React.FC<AnalyticsProps> = ({ trades, stats, settings }) => {
           { label: 'Win Rate',     val: `${stats.winRate}%`, color: '#a78bfa' },
           { label: 'Net Profit',   val: formatCurrency(stats.totalProfitLoss, settings.defaultCurrency || 'USD'), color: stats.totalProfitLoss >= 0 ? '#34d399' : '#f87171' },
           { label: 'Avg RR',       val: `1:${stats.rrAvg.toFixed(2)}`, color: 'var(--accent-purple)' },
-          { label: 'Max DD',       val: `${stats.maxDrawdown}%`, color: 'var(--accent-red)' },
         ].map(p => (
           <div key={p.label} style={{
             background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)',

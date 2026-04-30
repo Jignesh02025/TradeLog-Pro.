@@ -351,8 +351,7 @@ function useTrades() {
     const avgWin = wins > 0 ? winningTrades.reduce((sum, t) => sum + t.profitLoss, 0) / wins : 0
     const avgLoss = losses > 0 ? Math.abs(losingTrades.reduce((sum, t) => sum + t.profitLoss, 0) / losses) : 0
     
-    const rrTotal = trades.reduce((sum, t) => sum + (t.riskReward || 0), 0)
-    const rrAvg = total > 0 ? rrTotal / total : 0
+    const rrAvg = avgLoss > 0 ? avgWin / avgLoss : 0
 
     let maxPnl = 0
     let currentPnlSum = 0
