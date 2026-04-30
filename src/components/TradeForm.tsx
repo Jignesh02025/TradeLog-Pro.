@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react'
-import { X, Save, Calculator, Camera, Trash2, TrendingUp } from 'lucide-react'
+import { X, Save, Calculator, TrendingUp } from 'lucide-react'
 import type { Trade } from '../types'
 import type { TradeFormData } from '../hooks/useTrades'
 import { calculatePips, calculateProfit, getPipValue, calculateRR, COMMON_PAIRS } from '../utils/forexCalculations'
@@ -56,16 +56,13 @@ const EMPTY: TradeFormData = {
   manualOverride: false,
   tradeResult: '',
   notes: '',
-  screenshotFile: undefined,
 }
 
 const TradeForm: React.FC<TradeFormProps> = ({ initialData, onSubmit, onCancel, isModal }) => {
   const [form, setForm] = useState<TradeFormData>(EMPTY)
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null)
   const [errors, setErrors] = useState<FormErrors>({})
   const [submitted, setSubmitted] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const fileInputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     if (initialData) {
@@ -84,12 +81,9 @@ const TradeForm: React.FC<TradeFormProps> = ({ initialData, onSubmit, onCancel, 
         manualOverride: initialData.manualOverride || false,
         tradeResult: initialData.tradeResult || '',
         notes: initialData.notes,
-        screenshotFile: undefined,
       })
-      setPreviewUrl(initialData.screenshot || null)
     } else {
       setForm(EMPTY)
-      setPreviewUrl(null)
     }
     setErrors({})
     setSubmitted(false)
@@ -102,23 +96,6 @@ const TradeForm: React.FC<TradeFormProps> = ({ initialData, onSubmit, onCancel, 
     const next = { ...form, [field]: value }
     setForm(next)
     if (submitted) setErrors(validate(next))
-  }
-
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (file) {
-      setForm(prev => ({ ...prev, screenshotFile: file }))
-      const reader = new FileReader()
-      reader.onloadend = () => {
-        setPreviewUrl(reader.result as string)
-      }
-      reader.readAsDataURL(file)
-    }
-  }
-
-  const removeImage = () => {
-    setForm(prev => ({ ...prev, screenshotFile: undefined }))
-    setPreviewUrl(null)
   }
 
   const pips = calculatePips(form.pair, parseFloat(form.entryPrice), parseFloat(form.exitPrice), form.type)
@@ -146,7 +123,6 @@ const TradeForm: React.FC<TradeFormProps> = ({ initialData, onSubmit, onCancel, 
       await onSubmit(form)
       if (!initialData) { 
         setForm(EMPTY)
-        setPreviewUrl(null)
         setSubmitted(false) 
       }
     } finally {
@@ -301,34 +277,6 @@ const TradeForm: React.FC<TradeFormProps> = ({ initialData, onSubmit, onCancel, 
             style={{ color: currentPnl >= 0 ? 'var(--accent-green)' : 'var(--accent-red)', fontWeight: 800, fontSize: 18 }}
           />
         </div>
-      </div>
-
-      {/* Screenshot Upload */}
-      <div style={{ marginTop: 16 }}>
-        <label className="form-label">Trade Screenshot</label>
-        {previewUrl ? (
-          <div style={{ position: 'relative', width: '100%', height: 160, borderRadius: 12, overflow: 'hidden', border: '1px solid var(--border-color)' }}>
-            <img src={previewUrl} alt="Trade Screenshot" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-            <button 
-              type="button" 
-              onClick={removeImage}
-              style={{ position: 'absolute', top: 10, right: 10, background: 'rgba(239,68,68,0.9)', color: 'white', border: 'none', borderRadius: '50%', width: 28, height: 28, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-            >
-              <Trash2 size={14} />
-            </button>
-          </div>
-        ) : (
-          <div 
-            onClick={() => fileInputRef.current?.click()}
-            style={{ width: '100%', height: 100, border: '2px dashed var(--border-color)', borderRadius: 12, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 8, cursor: 'pointer', color: 'var(--text-muted)', transition: 'background 0.2s' }}
-            onMouseOver={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.02)')}
-            onMouseOut={e => (e.currentTarget.style.background = 'transparent')}
-          >
-            <Camera size={24} />
-            <span style={{ fontSize: 13 }}>Upload Chart Screenshot</span>
-            <input ref={fileInputRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handleImageUpload} />
-          </div>
-        )}
       </div>
 
       {/* Notes */}

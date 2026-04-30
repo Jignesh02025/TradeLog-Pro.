@@ -334,26 +334,8 @@ Provide a direct answer.
 
     const reply = chatCompletion.choices[0]?.message?.content;
 
-    // 6. Handle Image Extraction (Feature)
+    // 6. Handle Image Extraction (Feature) - REMOVED
     let tradesFound = null;
-    if (req.body.image) {
-      // In a real app, you would use a Vision model here.
-      // For this demo, we use the trades I (the AI Agent) extracted from the user's screenshot.
-      tradesFound = [
-        { date: '2026-03-09', pair: 'USDCAD', type: 'Buy', lot_size: 0.40, profit_loss: -3.83, entry_price: 1.35696, exit_price: 1.35683 },
-        { date: '2026-03-11', pair: 'EURUSD', type: 'Buy', lot_size: 0.30, profit_loss: -55.80, entry_price: 1.15877, exit_price: 1.15691 },
-        { date: '2026-03-24', pair: 'USDJPY', type: 'Sell', lot_size: 0.20, profit_loss: -70.64, entry_price: 158.551, exit_price: 159.113 },
-        { date: '2026-03-26', pair: 'GBPUSD', type: 'Buy', lot_size: 0.20, profit_loss: -53.60, entry_price: 1.33609, exit_price: 1.33341 },
-        { date: '2026-04-01', pair: 'GBPUSD', type: 'Sell', lot_size: 0.80, profit_loss: 172.00, entry_price: 1.33240, exit_price: 1.33025 },
-        { date: '2026-04-07', pair: 'EURUSD', type: 'Buy', lot_size: 0.23, profit_loss: -55.66, entry_price: 1.15555, exit_price: 1.15313 },
-        { date: '2026-04-07', pair: 'EURUSD', type: 'Buy', lot_size: 0.40, profit_loss: 104.80, entry_price: 1.15704, exit_price: 1.15966 },
-        { date: '2026-04-09', pair: 'USDCHF', type: 'Buy', lot_size: 0.20, profit_loss: -1.01, entry_price: 0.78949, exit_price: 0.78945 },
-        { date: '2026-04-09', pair: 'EURUSD', type: 'Sell', lot_size: 0.35, profit_loss: -70.35, entry_price: 1.16860, exit_price: 1.17061 },
-        { date: '2026-04-21', pair: 'EURUSD', type: 'Sell', lot_size: 0.30, profit_loss: 93.30, entry_price: 1.17847, exit_price: 1.17536 },
-        { date: '2026-04-23', pair: 'EURUSD', type: 'Buy', lot_size: 0.56, profit_loss: -103.60, entry_price: 1.16933, exit_price: 1.16748 },
-        { date: '2026-04-24', pair: 'EURUSD', type: 'Buy', lot_size: 0.32, profit_loss: 49.28, entry_price: 1.17052, exit_price: 1.17206 },
-      ];
-    }
 
     // 7. Save to Cache (Only for single questions)
     if (reply && (!history || history.length === 0)) {

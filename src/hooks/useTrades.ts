@@ -21,7 +21,6 @@ export interface TradeFormData {
   manualOverride: boolean
   tradeResult: string
   notes: string
-  screenshotFile?: File 
 }
 
 const DEFAULT_SETTINGS: AccountSettings = {
@@ -88,7 +87,6 @@ function useTrades() {
           manualOverride: t.manual_override,
           riskReward: t.risk_reward ? Number(t.risk_reward) : 0,
           tradeResult: t.trade_result,
-          screenshot: t.screenshot_url,
           notes: t.notes || '',
           createdAt: t.created_at
         }))
@@ -100,28 +98,6 @@ function useTrades() {
 
     fetchTrades()
   }, [user])
-
-  const uploadScreenshot = async (file: File): Promise<string | null> => {
-    if (!user) return null
-    
-    const fileExt = file.name.split('.').pop()
-    const fileName = `${user.id}/${uuid()}.${fileExt}`
-    
-    const { error: uploadError } = await supabase.storage
-      .from('trade-images')
-      .upload(fileName, file)
-
-    if (uploadError) {
-      console.error('Error uploading screenshot:', uploadError)
-      return null
-    }
-
-    const { data: { publicUrl } } = supabase.storage
-      .from('trade-images')
-      .getPublicUrl(fileName)
-
-    return publicUrl
-  }
 
   const addTrade = async (form: TradeFormData): Promise<Trade | null> => {
     if (!user) return null
@@ -147,12 +123,6 @@ function useTrades() {
 
     const tradeResult = form.tradeResult || (profitLoss > 0 ? 'Win' : profitLoss < 0 ? 'Loss' : 'Breakeven')
 
-    let screenshotUrl = ''
-    if (form.screenshotFile) {
-      const uploadedUrl = await uploadScreenshot(form.screenshotFile)
-      if (uploadedUrl) screenshotUrl = uploadedUrl
-    }
-
     const tradeData = {
       user_id: user.id,
       date: form.date,
@@ -169,7 +139,6 @@ function useTrades() {
       manual_override: form.manualOverride,
       risk_reward: rr,
       trade_result: tradeResult,
-      screenshot_url: screenshotUrl,
       notes: form.notes.trim(),
     }
 
@@ -200,7 +169,6 @@ function useTrades() {
       manualOverride: data.manual_override,
       riskReward: Number(data.risk_reward),
       tradeResult: data.trade_result,
-      screenshot: data.screenshot_url,
       notes: data.notes || '',
       createdAt: data.created_at
     }
@@ -233,12 +201,6 @@ function useTrades() {
 
     const tradeResult = form.tradeResult || (profitLoss > 0 ? 'Win' : profitLoss < 0 ? 'Loss' : 'Breakeven')
 
-    let screenshotUrl = undefined
-    if (form.screenshotFile) {
-      const uploadedUrl = await uploadScreenshot(form.screenshotFile)
-      if (uploadedUrl) screenshotUrl = uploadedUrl
-    }
-
     const updateData: any = {
       date: form.date,
       pair: form.pair.toUpperCase().trim(),
@@ -255,10 +217,6 @@ function useTrades() {
       risk_reward: rr,
       trade_result: tradeResult,
       notes: form.notes.trim()
-    }
-
-    if (screenshotUrl) {
-      updateData.screenshot_url = screenshotUrl
     }
 
     const { error } = await supabase
@@ -287,7 +245,6 @@ function useTrades() {
             manualOverride: form.manualOverride,
             riskReward: rr,
             tradeResult,
-            screenshot: screenshotUrl || t.screenshot,
             notes: form.notes.trim()
           }
         : t
@@ -357,7 +314,6 @@ function useTrades() {
         manualOverride: t.manual_override,
         riskReward: t.risk_reward ? Number(t.risk_reward) : 0,
         tradeResult: t.trade_result,
-        screenshot: t.screenshot_url,
         notes: t.notes || '',
         createdAt: t.created_at
       }))

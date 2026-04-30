@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { MessageCircle, Send, X, Bot, Loader2, ImagePlus, Plus } from 'lucide-react';
+import { MessageCircle, Send, X, Bot, Loader2, Plus } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 interface Message {
@@ -13,13 +13,11 @@ const AIChat: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [input, setInput] = useState('');
   const [messages, setMessages] = useState<Message[]>([
-    { role: 'assistant', content: 'Hi! I am your AI Trading Assistant. Ask me anything about your trades, or upload a screenshot to sync your journal.' }
+    { role: 'assistant', content: 'Hi! I am your AI Trading Assistant. Ask me anything about your trades.' }
   ]);
   const [isLoading, setIsLoading] = useState(false);
-  const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const { user } = useAuth();
   const scrollRef = useRef<HTMLDivElement>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -27,32 +25,18 @@ const AIChat: React.FC = () => {
     }
   }, [messages, isLoading]);
 
-  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setSelectedImage(reader.result as string);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
   const handleSend = async (e?: React.FormEvent, suggestion?: string) => {
     if (e) e.preventDefault();
     const userMessage = suggestion || input;
-    if (!userMessage && !selectedImage) return;
+    if (!userMessage) return;
 
     const newMessage: Message = { 
       role: 'user', 
-      content: userMessage || 'Analyzing screenshot...', 
-      image: selectedImage || undefined 
+      content: userMessage, 
     };
     
     setMessages(prev => [...prev, newMessage]);
     setInput('');
-    const currentImage = selectedImage;
-    setSelectedImage(null);
     setIsLoading(true);
 
     try {
@@ -62,7 +46,6 @@ const AIChat: React.FC = () => {
         body: JSON.stringify({ 
           question: userMessage, 
           userId: user?.id,
-          image: currentImage,
           history: messages.slice(1)
         }),
       });
@@ -170,9 +153,6 @@ const AIChat: React.FC = () => {
               background: msg.role === 'user' ? '#3b82f6' : 'rgba(255,255,255,0.07)', color: 'white', fontSize: '13.5px',
               lineHeight: '1.6', border: '1px solid rgba(255,255,255,0.1)'
             }}>
-              {msg.image && (
-                <img src={msg.image} alt="Upload" style={{ width: '100%', borderRadius: '8px', marginBottom: '8px', border: '1px solid rgba(255,255,255,0.2)' }} />
-              )}
               {msg.content}
               {msg.actions && msg.actions.map((action, idx) => (
                 <button
@@ -199,24 +179,12 @@ const AIChat: React.FC = () => {
 
       {/* Input */}
       <div style={{ padding: '16px', borderTop: '1px solid var(--border-color)', background: 'rgba(0,0,0,0.1)' }}>
-        {selectedImage && (
-          <div style={{ marginBottom: '12px', position: 'relative', display: 'inline-block' }}>
-            <img src={selectedImage} alt="Preview" style={{ height: '60px', width: '60px', objectCover: 'cover', borderRadius: '8px', border: '2px solid #3b82f6' }} />
-            <button onClick={() => setSelectedImage(null)} style={{ position: 'absolute', top: '-8px', right: '-8px', background: '#ef4444', borderRadius: '50%', padding: '2px', color: 'white', border: 'none' }}>
-              <X size={12} />
-            </button>
-          </div>
-        )}
         <form onSubmit={(e) => { e.preventDefault(); handleSend(); }} style={{ display: 'flex', gap: '10px' }}>
-          <input type="file" ref={fileInputRef} onChange={handleImageSelect} style={{ display: 'none' }} accept="image/*" />
-          <button type="button" onClick={() => fileInputRef.current?.click()} style={{ width: '42px', height: '42px', borderRadius: '12px', background: 'rgba(255,255,255,0.05)', color: '#94a3b8', border: 'none', cursor: 'pointer' }}>
-            <ImagePlus size={20} />
-          </button>
           <input
-            type="text" value={input} onChange={e => setInput(e.target.value)} placeholder="Ask or upload screenshot..."
+            type="text" value={input} onChange={e => setInput(e.target.value)} placeholder="Ask your trading assistant..."
             style={{ flex: 1, background: 'rgba(255,255,255,0.05)', border: '1px solid var(--border-color)', borderRadius: '12px', padding: '12px 16px', color: 'white', fontSize: '13px', outline: 'none' }}
           />
-          <button type="submit" disabled={isLoading || (!input.trim() && !selectedImage)} style={{ width: '42px', height: '42px', borderRadius: '12px', background: '#3b82f6', color: 'white', border: 'none', cursor: 'pointer' }}>
+          <button type="submit" disabled={isLoading || !input.trim()} style={{ width: '42px', height: '42px', borderRadius: '12px', background: '#3b82f6', color: 'white', border: 'none', cursor: 'pointer' }}>
             <Send size={18} />
           </button>
         </form>

@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react'
-import { Search, Pencil, Trash2, ArrowUpRight, ArrowDownRight, ChevronDown, AlertCircle, Camera, Image as ImageIcon, X } from 'lucide-react'
+import { Search, Pencil, Trash2, ArrowUpRight, ArrowDownRight, ChevronDown, AlertCircle, X } from 'lucide-react'
 import { format } from 'date-fns'
 import TradeForm from '../components/TradeForm'
 import type { Trade, FilterState, AccountSettings } from '../types'
@@ -27,7 +27,6 @@ const TradeList: React.FC<TradeListProps> = ({ trades, settings, onUpdate, onDel
   const [editTrade, setEditTrade] = useState<Trade | null>(null)
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null)
   const [sortDir, setSortDir] = useState<'desc' | 'asc'>('desc')
-  const [viewImage, setViewImage] = useState<string | null>(null)
 
   const setF = (field: keyof FilterState) => (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -35,13 +34,13 @@ const TradeList: React.FC<TradeListProps> = ({ trades, settings, onUpdate, onDel
 
   // Prevent background scroll when modal is open
   React.useEffect(() => {
-    if (editTrade || viewImage || deleteConfirm) {
+    if (editTrade || deleteConfirm) {
       document.body.style.overflow = 'hidden';
     } else {
       document.body.style.overflow = 'unset';
     }
     return () => { document.body.style.overflow = 'unset'; };
-  }, [editTrade, viewImage, deleteConfirm]);
+  }, [editTrade, deleteConfirm]);
 
   const filtered = useMemo(() => {
     let list = [...trades]
@@ -129,7 +128,6 @@ const TradeList: React.FC<TradeListProps> = ({ trades, settings, onUpdate, onDel
           <table className="trade-table">
             <thead>
               <tr>
-                <th>Chart</th>
                 <th onClick={() => setSortDir(d => d === 'desc' ? 'asc' : 'desc')} style={{ cursor: 'pointer' }}>
                   Date <ChevronDown size={12} style={{ transform: sortDir === 'asc' ? 'rotate(180deg)' : 'none' }} />
                 </th>
@@ -144,22 +142,10 @@ const TradeList: React.FC<TradeListProps> = ({ trades, settings, onUpdate, onDel
             </thead>
             <tbody>
               {filtered.length === 0 ? (
-                <tr><td colSpan={9} style={{ textAlign: 'center', padding: 60, color: 'var(--text-muted)' }}>No matches found.</td></tr>
+                <tr><td colSpan={8} style={{ textAlign: 'center', padding: 60, color: 'var(--text-muted)' }}>No matches found.</td></tr>
               ) : (
                 filtered.map(t => (
                   <tr key={t.id}>
-                    <td>
-                      {t.screenshot ? (
-                        <div 
-                          onClick={() => setViewImage(t.screenshot!)}
-                          style={{ width: 40, height: 28, borderRadius: 6, overflow: 'hidden', cursor: 'pointer', border: '1px solid rgba(255,255,255,0.1)' }}
-                        >
-                          <img src={t.screenshot} alt="Chart" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                        </div>
-                      ) : (
-                        <div style={{ color: 'rgba(255,255,255,0.05)' }}><ImageIcon size={18} /></div>
-                      )}
-                    </td>
                     <td style={{ color: 'var(--text-secondary)', fontSize: 12 }}>{format(new Date(t.date), 'dd MMM yyyy')}</td>
                     <td style={{ fontWeight: 700 }}>{t.pair}</td>
                     <td><span className={`badge ${t.type === 'Buy' ? 'badge-buy' : 'badge-sell'}`}>{t.type}</span></td>
@@ -188,21 +174,6 @@ const TradeList: React.FC<TradeListProps> = ({ trades, settings, onUpdate, onDel
           </table>
         </div>
       </div>
-
-      {/* Image Modal */}
-      {viewImage && (
-        <div className="modal-overlay" onClick={() => setViewImage(null)}>
-          <div className="modal-box" style={{ maxWidth: '90vw', padding: 10, background: 'transparent', border: 'none' }} onClick={e => e.stopPropagation()}>
-            <img src={viewImage} alt="Full Chart" style={{ width: '100%', height: 'auto', borderRadius: 12, boxShadow: '0 20px 50px rgba(0,0,0,0.5)' }} />
-            <button 
-              onClick={() => setViewImage(null)}
-              style={{ position: 'absolute', top: -10, right: -10, background: '#1e293b', color: 'white', border: 'none', borderRadius: '50%', width: 32, height: 32, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-            >
-              <X size={18} />
-            </button>
-          </div>
-        </div>
-      )}
 
       {/* Edit Modal */}
       {editTrade && (

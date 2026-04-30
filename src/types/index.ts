@@ -25,7 +25,6 @@ export interface Trade {
   manualOverride: boolean // renamed from isManualPnl
   riskReward: number      // renamed from rr
   tradeResult?: string    // new field
-  screenshot?: string     // public URL
   notes: string
   createdAt: string
 }
