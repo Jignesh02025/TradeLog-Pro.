@@ -91,9 +91,11 @@ const Analytics: React.FC<AnalyticsProps> = ({ trades, stats, settings }) => {
   }
 
   return (
-    <div className="fade-in" style={{ padding: '32px 36px', maxWidth: 1200 }}>
-      <div style={{ marginBottom: 28 }}>
-        <h1 style={{ fontSize: 26, fontWeight: 800, letterSpacing: '-0.03em' }}>Trading Analytics</h1>
+    <div style={{ padding: '32px 36px', maxWidth: 1200 }}>
+      <div className="fade-in" style={{ marginBottom: 28 }}>
+        <h1 className="page-title" style={{ fontSize: 26, fontWeight: 800, letterSpacing: '-0.03em' }}>
+          Trading <span className="gradient-text">Analytics</span>
+        </h1>
         <p style={{ color: 'var(--text-secondary)', marginTop: 4, fontSize: 14 }}>
           Deep dive into your Forex performance metrics ({settings.defaultCurrency})
         </p>
@@ -106,10 +108,12 @@ const Analytics: React.FC<AnalyticsProps> = ({ trades, stats, settings }) => {
           { label: 'Win Rate',     val: `${stats.winRate}%`, color: '#a78bfa' },
           { label: 'Net Profit',   val: formatCurrency(stats.totalProfitLoss, settings.defaultCurrency || 'USD'), color: stats.totalProfitLoss >= 0 ? '#34d399' : '#f87171' },
           { label: 'Avg RR',       val: `1:${stats.rrAvg.toFixed(2)}`, color: 'var(--accent-purple)' },
-        ].map(p => (
-          <div key={p.label} style={{
+        ].map((p, i) => (
+          <div key={p.label} className="analytics-pill fade-in" style={{
             background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)',
             borderRadius: 12, padding: '10px 20px', display: 'flex', gap: 12, alignItems: 'center',
+            animationDelay: `${i * 70}ms`,
+            cursor: 'default',
           }}>
             <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{p.label}</span>
             <span style={{ fontWeight: 700, fontSize: 16, color: p.color }}>{p.val}</span>
@@ -119,7 +123,7 @@ const Analytics: React.FC<AnalyticsProps> = ({ trades, stats, settings }) => {
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20, marginBottom: 20 }}>
         {/* Cumulative P&L Chart */}
-        <div className="glass-card" style={{ padding: 24, gridColumn: '1 / -1' }}>
+        <div className="glass-card fade-in stagger-2" style={{ padding: 24, gridColumn: '1 / -1' }}>
           <div style={{ fontWeight: 700, fontSize: 15, marginBottom: 20 }}>Equity Curve (Cumulative {settings.defaultCurrency})</div>
           <ResponsiveContainer width="100%" height={260}>
             <AreaChart data={performanceData}>
@@ -140,7 +144,7 @@ const Analytics: React.FC<AnalyticsProps> = ({ trades, stats, settings }) => {
         </div>
 
         {/* Win vs Loss Pie */}
-        <div className="glass-card" style={{ padding: 24 }}>
+        <div className="glass-card fade-in stagger-3" style={{ padding: 24 }}>
           <div style={{ fontWeight: 700, fontSize: 15, marginBottom: 20 }}>Win vs Loss Distribution</div>
           <ResponsiveContainer width="100%" height={240}>
             <PieChart>
@@ -163,7 +167,7 @@ const Analytics: React.FC<AnalyticsProps> = ({ trades, stats, settings }) => {
         </div>
 
         {/* Daily P&L Bar Chart */}
-        <div className="glass-card" style={{ padding: 24 }}>
+        <div className="glass-card fade-in stagger-4" style={{ padding: 24 }}>
           <div style={{ fontWeight: 700, fontSize: 15, marginBottom: 20 }}>Daily Profit/Loss ({settings.defaultCurrency})</div>
           <ResponsiveContainer width="100%" height={240}>
             <BarChart data={dailyStats} barSize={14}>

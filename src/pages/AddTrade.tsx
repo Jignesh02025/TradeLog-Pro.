@@ -26,9 +26,11 @@ const AddTrade: React.FC<AddTradeProps> = ({ onAdd }) => {
   }
 
   return (
-    <div className="fade-in" style={{ padding: '32px 36px', maxWidth: 800 }}>
-      <div style={{ marginBottom: 28 }}>
-        <h1 style={{ fontSize: 26, fontWeight: 800, letterSpacing: '-0.03em' }}>Log a Trade</h1>
+    <div style={{ padding: '32px 36px', maxWidth: 800 }}>
+      <div className="fade-in" style={{ marginBottom: 28 }}>
+        <h1 className="page-title" style={{ fontSize: 26, fontWeight: 800, letterSpacing: '-0.03em' }}>
+          Log a <span className="gradient-text">Trade</span>
+        </h1>
         <p style={{ color: 'var(--text-secondary)', marginTop: 4, fontSize: 14 }}>
           Fill in the details below — P&L is calculated automatically.
         </p>
@@ -36,21 +38,21 @@ const AddTrade: React.FC<AddTradeProps> = ({ onAdd }) => {
 
       {/* Success toast */}
       {successMsg && (
-        <div style={{
+        <div className="scale-in" style={{
           marginBottom: 20, padding: '14px 18px',
           background: 'rgba(16,185,129,0.12)',
-          border: '1px solid rgba(16,185,129,0.3)',
+          border: '1px solid rgba(16,185,129,0.35)',
           borderRadius: 12,
           display: 'flex', alignItems: 'center', gap: 10,
           color: '#10b981', fontWeight: 500, fontSize: 14,
-          animation: 'fadeIn 0.3s ease',
+          boxShadow: '0 0 20px rgba(16,185,129,0.1)',
         }}>
           <CheckCircle size={18} />
           Trade logged successfully!
         </div>
       )}
 
-      <div className="glass-card" style={{ padding: 32 }}>
+      <div className="glass-card fade-in stagger-1" style={{ padding: 32 }}>
         <TradeForm onSubmit={handleSubmit} />
       </div>
     </div>

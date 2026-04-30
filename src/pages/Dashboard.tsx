@@ -40,84 +40,47 @@ const Dashboard: React.FC<DashboardProps> = ({ trades, stats, settings, onNaviga
   const worstTradingDay = dailyPnlArr.length > 0 ? Math.min(...dailyPnlArr) : 0
 
   return (
-    <div className="fade-in" style={{ padding: '32px 36px', maxWidth: 1200 }}>
+    <div style={{ padding: '32px 36px', maxWidth: 1200 }}>
       {/* Header */}
-      <div style={{ marginBottom: 32, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <div className="fade-in" style={{ marginBottom: 32, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div>
-          <h1 style={{ fontSize: 28, fontWeight: 800, letterSpacing: '-0.03em' }}>
-            Professional Dashboard
+          <h1 className="page-title" style={{ fontSize: 28, fontWeight: 800, letterSpacing: '-0.03em' }}>
+            Professional <span className="gradient-text">Dashboard</span>
           </h1>
           <p style={{ color: 'var(--text-secondary)', marginTop: 4, fontSize: 14 }}>
             Performance analytics in {settings.defaultCurrency}
           </p>
         </div>
-        <div style={{ padding: '8px 16px', background: 'rgba(59,130,246,0.1)', borderRadius: 10, border: '1px solid rgba(59,130,246,0.2)', color: 'var(--accent-blue)', fontSize: 12, fontWeight: 700 }}>
+        <div className="fade-in stagger-3" style={{ padding: '8px 16px', background: 'rgba(59,130,246,0.1)', borderRadius: 10, border: '1px solid rgba(59,130,246,0.2)', color: 'var(--accent-blue)', fontSize: 12, fontWeight: 700, transition: 'box-shadow 0.2s', cursor: 'default' }}
+          onMouseEnter={e => (e.currentTarget.style.boxShadow = '0 0 14px rgba(59,130,246,0.25)')}
+          onMouseLeave={e => (e.currentTarget.style.boxShadow = 'none')}
+        >
           Account Currency: {settings.defaultCurrency || 'USD'}
         </div>
       </div>
 
       {/* Stat Cards Row 1 - High Level */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 18, marginBottom: 18 }}>
-        <StatCard
-          title="Total P&L"
-          value={fmtCurrency(stats.totalProfitLoss)}
-          subtitle={`${stats.totalTrades} Trades`}
-          color={stats.totalProfitLoss >= 0 ? 'green' : 'red'}
-          icon={stats.totalProfitLoss >= 0 ? <TrendingUp size={20} /> : <TrendingDown size={20} />}
-        />
-        <StatCard
-          title="Win Rate"
-          value={`${stats.winRate}%`}
-          subtitle={`${stats.wins}W / ${stats.losses}L`}
-          color="blue"
-          icon={<Percent size={20} />}
-        />
-        <StatCard
-          title="Average RR"
-          value={`1 : ${stats.rrAvg.toFixed(2)}`}
-          subtitle="Risk/Reward average"
-          color="purple"
-          icon={<Target size={20} />}
-        />
-        <StatCard
-          title="Profit / Loss Days"
-          value={`${totalProfitDays}W / ${totalLossDays}L`}
-          subtitle="Winning vs losing days"
-          color={totalProfitDays >= totalLossDays ? 'green' : 'red'}
-          icon={<Activity size={20} />}
-        />
+        <StatCard title="Total P&L" value={fmtCurrency(stats.totalProfitLoss)} subtitle={`${stats.totalTrades} Trades`}
+          color={stats.totalProfitLoss >= 0 ? 'green' : 'red'} icon={stats.totalProfitLoss >= 0 ? <TrendingUp size={20} /> : <TrendingDown size={20} />} delay={0} />
+        <StatCard title="Win Rate" value={`${stats.winRate}%`} subtitle={`${stats.wins}W / ${stats.losses}L`}
+          color="blue" icon={<Percent size={20} />} delay={60} />
+        <StatCard title="Average RR" value={`1 : ${stats.rrAvg.toFixed(2)}`} subtitle="Risk/Reward average"
+          color="purple" icon={<Target size={20} />} delay={120} />
+        <StatCard title="Profit / Loss Days" value={`${totalProfitDays}W / ${totalLossDays}L`} subtitle="Winning vs losing days"
+          color={totalProfitDays >= totalLossDays ? 'green' : 'red'} icon={<Activity size={20} />} delay={180} />
       </div>
 
       {/* Stat Cards Row 2 - Averages & Extrema */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 18, marginBottom: 36 }}>
-        <StatCard
-          title="Avg Win"
-          value={fmtCurrency(stats.avgWin)}
-          subtitle="Average profitable trade"
-          color="green"
-          icon={<Award size={20} />}
-        />
-        <StatCard
-          title="Avg Loss"
-          value={fmtCurrency(stats.avgLoss)}
-          subtitle="Average losing trade"
-          color="red"
-          icon={<TrendingDown size={20} />}
-        />
-        <StatCard
-          title="Worst Day"
-          value={fmtCurrency(worstTradingDay)}
-          subtitle="Highest single day loss"
-          color="red"
-          icon={<ArrowDownRight size={20} />}
-        />
-        <StatCard
-          title="Best Trade"
-          value={fmtCurrency(stats.bestTrade)}
-          subtitle="Highest single profit"
-          color="green"
-          icon={<ArrowUpRight size={20} />}
-        />
+        <StatCard title="Avg Win" value={fmtCurrency(stats.avgWin)} subtitle="Average profitable trade"
+          color="green" icon={<Award size={20} />} delay={240} />
+        <StatCard title="Avg Loss" value={fmtCurrency(stats.avgLoss)} subtitle="Average losing trade"
+          color="red" icon={<TrendingDown size={20} />} delay={300} />
+        <StatCard title="Worst Day" value={fmtCurrency(worstTradingDay)} subtitle="Highest single day loss"
+          color="red" icon={<ArrowDownRight size={20} />} delay={360} />
+        <StatCard title="Best Trade" value={fmtCurrency(stats.bestTrade)} subtitle="Highest single profit"
+          color="green" icon={<ArrowUpRight size={20} />} delay={420} />
       </div>
 
       {/* Recent Trades */}

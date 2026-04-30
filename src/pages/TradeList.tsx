@@ -73,11 +73,13 @@ const TradeList: React.FC<TradeListProps> = ({ trades, settings, onUpdate, onDel
   const hasFilters = filter.search || filter.dateFrom || filter.dateTo || filter.profitLossFilter !== 'all' || filter.minProfitLoss || filter.maxProfitLoss
 
   return (
-    <div className="fade-in" style={{ padding: '32px 36px', maxWidth: 1400 }}>
+    <div style={{ padding: '32px 36px', maxWidth: 1400 }}>
       {/* Header */}
-      <div style={{ marginBottom: 24, display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
+      <div className="fade-in" style={{ marginBottom: 24, display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
         <div>
-          <h1 style={{ fontSize: 26, fontWeight: 800, letterSpacing: '-0.03em' }}>Trade History</h1>
+          <h1 className="page-title" style={{ fontSize: 26, fontWeight: 800, letterSpacing: '-0.03em' }}>
+            Trade <span className="gradient-text">History</span>
+          </h1>
           <p style={{ color: 'var(--text-secondary)', marginTop: 4, fontSize: 14 }}>
             {trades.length} trades logged · {filtered.length} showing
           </p>
@@ -85,7 +87,7 @@ const TradeList: React.FC<TradeListProps> = ({ trades, settings, onUpdate, onDel
       </div>
 
       {/* Advanced Filters */}
-      <div className="glass-card" style={{ padding: '20px', marginBottom: 20 }}>
+      <div className="glass-card fade-in stagger-1" style={{ padding: '20px', marginBottom: 20 }}>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: 12, alignItems: 'flex-end' }}>
           <div>
             <label className="form-label" style={{ fontSize: 11 }}>Search Pair</label>
@@ -123,7 +125,7 @@ const TradeList: React.FC<TradeListProps> = ({ trades, settings, onUpdate, onDel
       </div>
 
       {/* Table */}
-      <div className="glass-card" style={{ padding: 0, overflow: 'hidden' }}>
+      <div className="glass-card fade-in stagger-2" style={{ padding: 0, overflow: 'hidden' }}>
         <div style={{ overflowX: 'auto' }}>
           <table className="trade-table">
             <thead>
@@ -144,8 +146,8 @@ const TradeList: React.FC<TradeListProps> = ({ trades, settings, onUpdate, onDel
               {filtered.length === 0 ? (
                 <tr><td colSpan={8} style={{ textAlign: 'center', padding: 60, color: 'var(--text-muted)' }}>No matches found.</td></tr>
               ) : (
-                filtered.map(t => (
-                  <tr key={t.id}>
+                filtered.map((t, rowIdx) => (
+                  <tr key={t.id} style={{ animationDelay: `${rowIdx * 30}ms` }}>
                     <td style={{ color: 'var(--text-secondary)', fontSize: 12 }}>{format(new Date(t.date), 'dd MMM yyyy')}</td>
                     <td style={{ fontWeight: 700 }}>{t.pair}</td>
                     <td><span className={`badge ${t.type === 'Buy' ? 'badge-buy' : 'badge-sell'}`}>{t.type}</span></td>
