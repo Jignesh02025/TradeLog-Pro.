@@ -1,75 +1,92 @@
-# TradeLog-Pro
+# TradeLog Pro — Trading Journal
 
-A comprehensive Trading Journal application with MT5 integration and AI-powered analytics.
+A professional Forex trading journal with AI analytics and MetaTrader 5 integration.
 
-## Features
-- **MT5 Bridge**: Automatically sync trades from MetaTrader 5 to your journal.
-- **AI Chat Assistant**: Ask questions about your trading performance in natural language.
-- **Dashboard**: Track your profit, win rate, and key performance metrics.
-- **Supabase Integration**: Secure data storage and authentication.
+## 📁 Project Structure
 
-## Getting Started
+```
+Trading Journal/
+├── frontend/        ← React.js app (Vite)
+│   ├── src/
+│   │   ├── components/
+│   │   ├── pages/
+│   │   ├── hooks/
+│   │   ├── context/
+│   │   ├── utils/
+│   │   └── lib/
+│   ├── index.html
+│   ├── vite.config.js
+│   ├── package.json
+│   └── .env         ← VITE_ variables only
+│
+├── backend/         ← Node.js + Express API server
+│   ├── index.js
+│   ├── package.json
+│   └── .env         ← DB, GROQ, PORT variables
+│
+├── mt5/             ← Python MT5 bridge scripts
+│   ├── mt5_bridge.py
+│   ├── mt5_diagnostics.py
+│   └── mt5_inspect.py
+│
+├── supabase_setup.sql  ← Run once to create DB tables
+├── .gitignore
+└── README.md
+```
 
-### Prerequisites
-- Node.js (v18+)
-- Python 3.8+ (for MT5 Bridge)
-- MetaTrader 5 Terminal (for MT5 Bridge)
+## 🚀 Running the Project
 
-### Installation
+### 1. Frontend (React App)
+```bash
+cd frontend
+npm install
+npm run dev
+# Opens at http://localhost:5173
+```
 
-1. **Clone the repository:**
-   ```bash
-   git clone https://github.com/yourusername/TradeLog-Pro.git
-   cd TradeLog-Pro
-   ```
+### 2. Backend (Express Server)
+```bash
+cd backend
+npm install
+node index.js
+# Runs at http://localhost:5000
+```
 
-2. **Frontend Setup:**
-   ```bash
-   npm install
-   ```
+### 3. MT5 Bridge (optional, auto-sync trades)
+```bash
+# Open MetaTrader 5 first, then:
+cd mt5
+python mt5_bridge.py
+```
 
-3. **Backend Server Setup:**
-   ```bash
-   cd server
-   npm install
-   cd ..
-   ```
+## 🔑 Environment Variables
 
-4. **Python Bridge Setup:**
-   ```bash
-   pip install MetaTrader5 requests python-dotenv
-   ```
+### `frontend/.env`
+```env
+VITE_SUPABASE_URL=https://xxxx.supabase.co
+VITE_SUPABASE_ANON_KEY=your_anon_key
+```
 
-### Configuration
+### `backend/.env`
+```env
+DB_USER=postgres
+DB_PASSWORD=your_password
+DB_HOST=db.xxxx.supabase.co
+DB_NAME=postgres
+DB_PORT=5432
+GROQ_API_KEY=gsk_xxx...
+PORT=5000
+```
 
-1. Copy `.env.example` to `.env`:
-   ```bash
-   cp .env.example .env
-   ```
-2. Fill in the required environment variables in `.env`:
-   - `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY`
-   - `DB_*` credentials for the Supabase database.
-   - `MT5_USER_ID` (Found in your profile page).
-   - `GROQ_API_KEY` for AI features.
+## 🛠️ Tech Stack
 
-### Running the Application
-
-1. **Start the Frontend:**
-   ```bash
-   npm run dev
-   ```
-
-2. **Start the Backend Server:**
-   ```bash
-   npm run server
-   ```
-
-3. **Run the MT5 Bridge:**
-   Ensure your MT5 terminal is open and logged in, then:
-   ```bash
-   python mt5_bridge.py
-   ```
-
-## License
-MIT
-"# TradeLog-Pro" 
+| Layer | Technology |
+|---|---|
+| Frontend | React.js + Vite |
+| Styling | Vanilla CSS |
+| Backend | Node.js + Express |
+| Database | Supabase (PostgreSQL) |
+| Auth | Supabase Auth |
+| AI | Groq API (LLaMA 3.3) |
+| Charts | Recharts |
+| MT5 Sync | Python |
