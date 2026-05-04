@@ -83,7 +83,7 @@ const TradingCalendar = ({ trades, currency }) => {
   return (
     <div className="glass-card" style={{ padding: 24, marginTop: 24 }}>
       {/* Header */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 28 }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 28, flexWrap: 'wrap', gap: 12 }}>
         <div>
           <div style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 4 }}>Monthly PnL</div>
           <div style={{ fontSize: 22, fontWeight: 800, color: monthPnl >= 0 ? 'var(--accent-green)' : 'var(--accent-red)' }}>
@@ -91,9 +91,9 @@ const TradingCalendar = ({ trades, currency }) => {
           </div>
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
           <button onClick={prevMonth} className="nav-btn" title="Previous Month"><ChevronLeft size={20} /></button>
-          <div style={{ fontSize: 18, fontWeight: 800, minWidth: 160, textAlign: 'center', letterSpacing: '-0.01em' }}>
+          <div style={{ fontSize: 16, fontWeight: 800, minWidth: 140, textAlign: 'center', letterSpacing: '-0.01em' }}>
             {format(currentDate, 'MMMM yyyy')}
           </div>
           <button onClick={nextMonth} className="nav-btn" title="Next Month"><ChevronRight size={20} /></button>
@@ -102,30 +102,15 @@ const TradingCalendar = ({ trades, currency }) => {
         <button onClick={goToToday} className="today-btn">Today</button>
       </div>
 
-      {/* Calendar Grid */}
-      <div style={{ 
-        display: 'grid', 
-        gridTemplateColumns: 'repeat(7, 1fr) 160px', 
-        background: 'rgba(255,255,255,0.05)',
-        gap: '1px',
-        border: '1px solid rgba(255,255,255,0.05)',
-        borderRadius: 12,
-        overflow: 'hidden'
-      }}>
-        {/* Day Headers */}
-        {['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', "WEEK'S TOTAL"].map(day => (
-          <div key={day} style={{ 
-            padding: '12px 0', 
-            fontSize: 11, 
-            fontWeight: 800, 
-            color: 'var(--text-muted)',
-            textAlign: 'center',
-            letterSpacing: '0.1em',
-            background: 'var(--bg-card)'
-          }}>
-            {day}
-          </div>
-        ))}
+      {/* Calendar Grid - now more responsive */}
+      <div className="calendar-scroll-container">
+        <div className="calendar-grid">
+          {/* Day Headers */}
+          {['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', "TOTAL"].map((day, idx) => (
+            <div key={day} className={`calendar-header-cell ${idx === 7 ? 'weekly-total-col' : ''}`}>
+              {day}
+            </div>
+          ))}
 
         {/* Days */}
         {calendarDays.map((day, i) => {
@@ -187,31 +172,21 @@ const TradingCalendar = ({ trades, currency }) => {
 
               {/* Add Weekly Total at the end of each row (after Saturday) */}
               {(i + 1) % 7 === 0 && (
-                <div style={{
-                  padding: '16px',
-                  background: 'rgba(255,255,255,0.02)',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                  borderLeft: '1px solid rgba(255,255,255,0.05)'
-                }}>
-                  <div style={{ fontSize: 10, color: 'var(--text-muted)', marginBottom: 6, fontWeight: 700, letterSpacing: '0.05em' }}>WEEK {Math.ceil((i+1)/7)}</div>
-                  <div style={{ 
-                    fontSize: 14, 
-                    fontWeight: 800, 
-                    color: weeklyStats[Math.floor(i/7)]?.pnl >= 0 ? 'var(--accent-green)' : 'var(--accent-red)'
-                  }}>
-                    {formatCurrency(weeklyStats[Math.floor(i/7)]?.pnl || 0, currency)}
+                  <div className="weekly-total-col weekly-total-cell">
+                    <div style={{ fontSize: 9, color: 'var(--text-muted)', marginBottom: 4, fontWeight: 700 }}>WK {Math.ceil((i+1)/7)}</div>
+                    <div style={{ 
+                      fontSize: 12, 
+                      fontWeight: 800, 
+                      color: weeklyStats[Math.floor(i/7)]?.pnl >= 0 ? 'var(--accent-green)' : 'var(--accent-red)'
+                    }}>
+                      {formatCurrency(weeklyStats[Math.floor(i/7)]?.pnl || 0, currency)}
+                    </div>
                   </div>
-                  <div style={{ fontSize: 10, color: 'var(--text-muted)', fontWeight: 500, marginTop: 2 }}>
-                    {weeklyStats[Math.floor(i/7)]?.count || 0} trade{weeklyStats[Math.floor(i/7)]?.count !== 1 ? 's' : ''}
-                  </div>
-                </div>
-              )}
+                )}
             </React.Fragment>
           );
         })}
+        </div>
       </div>
 
       <style>{`

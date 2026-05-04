@@ -23,11 +23,12 @@ const Sidebar = ({ activePage, onNavigate, onOpenImport }) => {
   ]
 
   return (
-    <aside style={{
-      width: 240, minWidth: 240,
-      background: 'linear-gradient(180deg, #0c1322 0%, #0a0f1e 100%)',
+    <aside 
+      className="sidebar"
+      style={{
+        background: 'linear-gradient(180deg, #0c1322 0%, #0a0f1e 100%)',
       borderRight: '1px solid rgba(255,255,255,0.06)',
-      display: 'flex', flexDirection: 'column', height: '100vh',
+      display: 'flex', flexDirection: 'column',
       position: 'sticky', top: 0,
       animation: 'fadeInLeft 0.45s cubic-bezier(0.22,1,0.36,1) both',
       overflow: 'hidden',

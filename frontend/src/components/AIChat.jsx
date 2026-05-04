@@ -105,9 +105,9 @@ const AIChat = () => {
 
   return (
     <div
-      className="glass-card fade-in"
+      className="glass-card fade-in ai-chat-panel"
       style={{
-        position: 'fixed', bottom: '24px', right: '24px', width: '400px', height: '620px',
+        position: 'fixed', bottom: '24px', right: '24px', width: '400px', height: '600px',
         display: 'flex', flexDirection: 'column', zIndex: 1000, overflow: 'hidden',
         border: '1px solid rgba(255,255,255,0.1)', boxShadow: '0 20px 40px rgba(0,0,0,0.4)',
       }}

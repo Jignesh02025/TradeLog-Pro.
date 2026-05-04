@@ -28,12 +28,15 @@ const StatCard = ({ title, value, subtitle, color, icon, delay = 0 }) => {
           }}>
             {title}
           </div>
-          <div style={{
-            fontSize: 28, fontWeight: 800, letterSpacing: '-0.03em',
-            color: 'var(--text-primary)',
-            animation: 'countUp 0.5s ease both',
-            animationDelay: `${delay + 100}ms`,
-          }}>
+          <div 
+            className="stat-value"
+            style={{
+              fontSize: 28, fontWeight: 800, letterSpacing: '-0.03em',
+              color: 'var(--text-primary)',
+              animation: 'countUp 0.5s ease both',
+              animationDelay: `${delay + 100}ms`,
+            }}
+          >
             {value}
           </div>
           {subtitle && (

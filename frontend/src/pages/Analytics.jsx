@@ -70,7 +70,7 @@ const Analytics = ({ trades, stats, settings }) => {
 
   if (trades.length === 0) {
     return (
-      <div className="fade-in" style={{ padding: '32px 36px', maxWidth: 1200 }}>
+      <div className="fade-in page-content" style={{ padding: '32px 36px', maxWidth: 1200 }}>
         <h1 style={{ fontSize: 26, fontWeight: 800, letterSpacing: '-0.03em', marginBottom: 8 }}>Forex Analytics</h1>
         <div style={{ textAlign: 'center', paddingTop: 80 }}>
           <div style={{ fontSize: 56 }}>📊</div>
@@ -83,7 +83,7 @@ const Analytics = ({ trades, stats, settings }) => {
   }
 
   return (
-    <div style={{ padding: '32px 36px', maxWidth: 1200 }}>
+    <div className="page-content" style={{ padding: '32px 36px', maxWidth: 1200 }}>
       <div className="fade-in" style={{ marginBottom: 28 }}>
         <h1 className="page-title" style={{ fontSize: 26, fontWeight: 800, letterSpacing: '-0.03em' }}>
           Trading <span className="gradient-text">Analytics</span>
@@ -94,7 +94,7 @@ const Analytics = ({ trades, stats, settings }) => {
       </div>
 
       {/* Summary pills */}
-      <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginBottom: 32 }}>
+      <div className="analytics-pills" style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginBottom: 32 }}>
         {[
           { label: 'Total Trades', val: stats.totalTrades, color: '#60a5fa' },
           { label: 'Win Rate',     val: `${stats.winRate}%`, color: '#a78bfa' },
@@ -113,11 +113,12 @@ const Analytics = ({ trades, stats, settings }) => {
         ))}
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20, marginBottom: 20 }}>
-        {/* Cumulative P&L Chart */}
+      {/* Charts grid */}
+      <div className="analytics-charts-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20, marginBottom: 20 }}>
+        {/* Cumulative P&L Chart - full width */}
         <div className="glass-card fade-in stagger-2" style={{ padding: 24, gridColumn: '1 / -1' }}>
           <div style={{ fontWeight: 700, fontSize: 15, marginBottom: 20 }}>Equity Curve (Cumulative {settings.defaultCurrency})</div>
-          <ResponsiveContainer width="100%" height={260}>
+          <ResponsiveContainer width="100%" height={240}>
             <AreaChart data={performanceData}>
               <defs>
                 <linearGradient id="pnlGrad" x1="0" y1="0" x2="0" y2="1">
@@ -143,7 +144,7 @@ const Analytics = ({ trades, stats, settings }) => {
               <Pie
                 data={winLossData}
                 cx="50%" cy="50%"
-                innerRadius={65} outerRadius={95}
+                innerRadius={55} outerRadius={85}
                 paddingAngle={4}
                 dataKey="value"
               >

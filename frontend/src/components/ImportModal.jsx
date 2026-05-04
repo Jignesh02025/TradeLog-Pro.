@@ -97,11 +97,11 @@ const ImportModal = ({ onImport, onClose }) => {
                     <tbody>
                       {preview.map((t, i) => (
                         <tr key={i}>
-                          <td>{t.date}</td>
-                          <td style={{ fontWeight: 600 }}>{t.pair}</td>
-                          <td><span className={`badge ${t.type === 'Buy' ? 'badge-buy' : 'badge-sell'}`} style={{ fontSize: 10 }}>{t.type}</span></td>
-                          <td>{t.lotSize}</td>
-                          <td className={(t.profitLoss || 0) >= 0 ? 'pnl-positive' : 'pnl-negative'}>${t.profitLoss?.toFixed(2)}</td>
+                          <td data-label="Date">{t.date}</td>
+                          <td data-label="Symbol" style={{ fontWeight: 600 }}>{t.pair}</td>
+                          <td data-label="Type"><span className={`badge ${t.type === 'Buy' ? 'badge-buy' : 'badge-sell'}`} style={{ fontSize: 10 }}>{t.type}</span></td>
+                          <td data-label="Lots">{t.lotSize}</td>
+                          <td data-label="Profit" className={(t.profitLoss || 0) >= 0 ? 'pnl-positive' : 'pnl-negative'}>${t.profitLoss?.toFixed(2)}</td>
                         </tr>
                       ))}
                     </tbody>

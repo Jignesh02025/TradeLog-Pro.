@@ -14,9 +14,9 @@ const Settings = ({ settings, onUpdateSettings, onClearData }) => {
   }
 
   return (
-    <div className="fade-in" style={{ padding: '32px 36px', maxWidth: 800 }}>
+    <div className="fade-in page-content" style={{ padding: '32px 36px', maxWidth: 800 }}>
       <div style={{ marginBottom: 32 }}>
-        <h1 style={{ fontSize: 26, fontWeight: 800, letterSpacing: '-0.03em', display: 'flex', alignItems: 'center', gap: 12 }}>
+        <h1 style={{ fontSize: 26, fontWeight: 800, letterSpacing: '-0.03em', display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
           <SettingsIcon size={24} /> Account Settings
         </h1>
         <p style={{ color: 'var(--text-secondary)', marginTop: 4, fontSize: 14 }}>
@@ -27,8 +27,8 @@ const Settings = ({ settings, onUpdateSettings, onClearData }) => {
       <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
         {/* Currency Setting */}
         <div className="glass-card" style={{ padding: 24 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20 }}>
-            <div style={{ width: 40, height: 40, borderRadius: 10, background: 'rgba(59,130,246,0.1)', color: 'var(--accent-blue)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20, flexWrap: 'wrap' }}>
+            <div style={{ width: 40, height: 40, borderRadius: 10, background: 'rgba(59,130,246,0.1)', color: 'var(--accent-blue)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
               <CreditCard size={20} />
             </div>
             <div>
@@ -37,7 +37,7 @@ const Settings = ({ settings, onUpdateSettings, onClearData }) => {
             </div>
           </div>
           
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12 }}>
+          <div className="currency-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12 }}>
             {currencies.map(c => (
               <button
                 key={c}
@@ -52,7 +52,8 @@ const Settings = ({ settings, onUpdateSettings, onClearData }) => {
                   fontWeight: settings.defaultCurrency === c ? 700 : 500,
                   cursor: 'pointer',
                   transition: 'all 0.2s',
-                  fontSize: 14
+                  fontSize: 14,
+                  minHeight: 44,
                 }}
               >
                 {c}
@@ -63,8 +64,8 @@ const Settings = ({ settings, onUpdateSettings, onClearData }) => {
 
         {/* Risk Percentage Setting */}
         <div className="glass-card" style={{ padding: 24 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20 }}>
-            <div style={{ width: 40, height: 40, borderRadius: 10, background: 'rgba(167,139,250,0.1)', color: 'var(--accent-purple)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20, flexWrap: 'wrap' }}>
+            <div style={{ width: 40, height: 40, borderRadius: 10, background: 'rgba(167,139,250,0.1)', color: 'var(--accent-purple)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
               <Shield size={20} />
             </div>
             <div>
@@ -89,8 +90,8 @@ const Settings = ({ settings, onUpdateSettings, onClearData }) => {
 
         {/* Security & Data */}
         <div className="glass-card" style={{ padding: 24 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20 }}>
-            <div style={{ width: 40, height: 40, borderRadius: 10, background: 'rgba(239,68,68,0.1)', color: 'var(--accent-red)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20, flexWrap: 'wrap' }}>
+            <div style={{ width: 40, height: 40, borderRadius: 10, background: 'rgba(239,68,68,0.1)', color: 'var(--accent-red)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
               <Shield size={20} />
             </div>
             <div>
@@ -99,7 +100,7 @@ const Settings = ({ settings, onUpdateSettings, onClearData }) => {
             </div>
           </div>
 
-          <div style={{ display: 'flex', gap: 12 }}>
+          <div className="settings-data-btns" style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
             <button 
               onClick={onClearData}
               className="btn-danger" 

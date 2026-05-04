@@ -123,7 +123,7 @@ const TradeForm = ({ initialData, onSubmit, onCancel, isModal }) => {
         </div>
       )}
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+      <div className="form-grid-2" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
         {/* Date */}
         <div>
           <label className="form-label">Trade Date</label>
@@ -212,7 +212,7 @@ const TradeForm = ({ initialData, onSubmit, onCancel, isModal }) => {
           <Calculator size={14} /> Calculations
         </h3>
         
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
+        <div className="calc-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
           {/* Pip Value */}
           <div>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>

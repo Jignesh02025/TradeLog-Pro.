@@ -61,8 +61,12 @@ const TradeList = ({ trades, settings, onUpdate, onDelete }) => {
   const resetFilters = () => setFilter(EMPTY_FILTER)
   const hasFilters = filter.search || filter.dateFrom || filter.dateTo || filter.profitLossFilter !== 'all' || filter.minProfitLoss || filter.maxProfitLoss
 
+  const [expandedId, setExpandedId] = useState(null)
+
+  const toggleExpand = (id) => setExpandedId(expandedId === id ? null : id)
+
   return (
-    <div style={{ padding: '32px 36px', maxWidth: 1400 }}>
+    <div className="page-content" style={{ padding: '32px 36px', maxWidth: 1400 }}>
       {/* Header */}
       <div className="fade-in" style={{ marginBottom: 24, display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
         <div>
@@ -77,7 +81,7 @@ const TradeList = ({ trades, settings, onUpdate, onDelete }) => {
 
       {/* Advanced Filters */}
       <div className="glass-card fade-in stagger-1" style={{ padding: '20px', marginBottom: 20 }}>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: 12, alignItems: 'flex-end' }}>
+        <div className="filter-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 12, alignItems: 'flex-end' }}>
           <div>
             <label className="form-label" style={{ fontSize: 11 }}>Search Pair</label>
             <div style={{ position: 'relative' }}>
@@ -101,15 +105,13 @@ const TradeList = ({ trades, settings, onUpdate, onDelete }) => {
               <option value="loss">Loss only</option>
             </select>
           </div>
-          <div>
-            <label className="form-label" style={{ fontSize: 11 }}>Min Profit ($)</label>
-            <input type="number" className="filter-chip" style={{ width: '100%' }} placeholder="Min..." value={filter.minProfitLoss} onChange={setF('minProfitLoss')} />
+          <div className="filter-actions-row" style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            {hasFilters && (
+              <button onClick={resetFilters} style={{ background: 'transparent', border: 'none', color: '#60a5fa', cursor: 'pointer', fontSize: 12, fontWeight: 600 }}>
+                ✕ Reset
+              </button>
+            )}
           </div>
-          {hasFilters && (
-            <button onClick={resetFilters} style={{ background: 'transparent', border: 'none', color: '#60a5fa', cursor: 'pointer', fontSize: 12, fontWeight: 600, paddingBottom: 10 }}>
-              Reset
-            </button>
-          )}
         </div>
       </div>
 
@@ -133,33 +135,41 @@ const TradeList = ({ trades, settings, onUpdate, onDelete }) => {
             </thead>
             <tbody>
               {filtered.length === 0 ? (
-                <tr><td colSpan={8} style={{ textAlign: 'center', padding: 60, color: 'var(--text-muted)' }}>No matches found.</td></tr>
+                <tr><td colSpan={8} data-label="" style={{ textAlign: 'center', padding: 60, color: 'var(--text-muted)' }}>No matches found.</td></tr>
               ) : (
-                filtered.map((t, rowIdx) => (
-                  <tr key={t.id} style={{ animationDelay: `${rowIdx * 30}ms` }}>
-                    <td style={{ color: 'var(--text-secondary)', fontSize: 12 }}>{format(new Date(t.date), 'dd MMM yyyy')}</td>
-                    <td style={{ fontWeight: 700 }}>{t.pair}</td>
-                    <td><span className={`badge ${t.type === 'Buy' ? 'badge-buy' : 'badge-sell'}`}>{t.type}</span></td>
-                    <td><span className="badge badge-lots">{t.lotSize}</span></td>
-                    <td>
-                      <span style={{ fontWeight: 600, color: (t.riskReward || 0) >= 2 ? 'var(--accent-green)' : (t.riskReward || 0) < 1 ? 'var(--accent-red)' : 'inherit' }}>
-                        1:{t.riskReward || '—'}
-                      </span>
-                    </td>
-                    <td style={{ fontWeight: 600, color: t.pips >= 0 ? 'var(--accent-green)' : 'var(--accent-red)' }}>
-                      {t.pips >= 0 ? '+' : ''}{t.pips.toFixed(1)}
-                    </td>
-                    <td className={t.profitLoss >= 0 ? 'pnl-positive' : 'pnl-negative'}>
-                      {fmtCurrency(t.profitLoss)}
-                    </td>
-                    <td>
-                      <div style={{ display: 'flex', gap: 6 }}>
-                        <button className="btn-edit" onClick={() => setEditTrade(t)}><Pencil size={12} /></button>
-                        <button className="btn-danger" onClick={() => setDeleteConfirm(t.id)}><Trash2 size={12} /></button>
-                      </div>
-                    </td>
-                  </tr>
-                ))
+                filtered.map((t, rowIdx) => {
+                  const isExpanded = expandedId === t.id;
+                  return (
+                    <tr key={t.id} className={isExpanded ? 'row-expanded' : ''} style={{ animationDelay: `${rowIdx * 30}ms` }}>
+                      <td data-label="Date" style={{ color: 'var(--text-secondary)', fontSize: 12 }}>{format(new Date(t.date), 'dd MMM yyyy')}</td>
+                      <td data-label="Pair" style={{ fontWeight: 700 }}>{t.pair}</td>
+                      <td data-label="Type"><span className={`badge ${t.type === 'Buy' ? 'badge-buy' : 'badge-sell'}`}>{t.type}</span></td>
+                      <td data-label="Lots" className="mobile-hide-detail"><span className="badge badge-lots">{t.lotSize}</span></td>
+                      <td data-label="RR" className="mobile-hide-detail">
+                        <span style={{ fontWeight: 600, color: (t.riskReward || 0) >= 2 ? 'var(--accent-green)' : (t.riskReward || 0) < 1 ? 'var(--accent-red)' : 'inherit' }}>
+                          1:{t.riskReward || '—'}
+                        </span>
+                      </td>
+                      <td data-label="Pips" className="mobile-hide-detail" style={{ fontWeight: 600, color: t.pips >= 0 ? 'var(--accent-green)' : 'var(--accent-red)' }}>
+                        {t.pips >= 0 ? '+' : ''}{t.pips.toFixed(1)}
+                      </td>
+                      <td data-label="P&L" className={t.profitLoss >= 0 ? 'pnl-positive' : 'pnl-negative'}>
+                        {fmtCurrency(t.profitLoss)}
+                      </td>
+                      <td data-label="Actions">
+                        <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+                          <button className="btn-edit mobile-detail-toggle" onClick={(e) => { e.stopPropagation(); toggleExpand(t.id); }}>
+                            <AlertCircle size={14} />
+                          </button>
+                          <div className="action-btns-desktop" style={{ display: 'flex', gap: 6 }}>
+                            <button className="btn-edit" onClick={() => setEditTrade(t)}><Pencil size={12} /></button>
+                            <button className="btn-danger" onClick={() => setDeleteConfirm(t.id)}><Trash2 size={12} /></button>
+                          </div>
+                        </div>
+                      </td>
+                    </tr>
+                  )
+                })
               )}
             </tbody>
           </table>

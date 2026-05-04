@@ -32,9 +32,9 @@ const Dashboard = ({ trades, stats, settings, onNavigate }) => {
   const worstTradingDay = dailyPnlArr.length > 0 ? Math.min(...dailyPnlArr) : 0
 
   return (
-    <div style={{ padding: '32px 36px', maxWidth: 1200 }}>
+    <div className="page-content" style={{ padding: '32px 36px', maxWidth: 1200 }}>
       {/* Header */}
-      <div className="fade-in" style={{ marginBottom: 32, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <div className="fade-in dashboard-header" style={{ marginBottom: 32, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div>
           <h1 className="page-title" style={{ fontSize: 28, fontWeight: 800, letterSpacing: '-0.03em' }}>
             Professional <span className="gradient-text">Dashboard</span>
@@ -43,16 +43,16 @@ const Dashboard = ({ trades, stats, settings, onNavigate }) => {
             Performance analytics in {settings.defaultCurrency}
           </p>
         </div>
-        <div className="fade-in stagger-3" style={{ padding: '8px 16px', background: 'rgba(59,130,246,0.1)', borderRadius: 10, border: '1px solid rgba(59,130,246,0.2)', color: 'var(--accent-blue)', fontSize: 12, fontWeight: 700, transition: 'box-shadow 0.2s', cursor: 'default' }}
+        <div className="fade-in stagger-3" style={{ padding: '8px 16px', background: 'rgba(59,130,246,0.1)', borderRadius: 10, border: '1px solid rgba(59,130,246,0.2)', color: 'var(--accent-blue)', fontSize: 12, fontWeight: 700, transition: 'box-shadow 0.2s', cursor: 'default', whiteSpace: 'nowrap' }}
           onMouseEnter={e => (e.currentTarget.style.boxShadow = '0 0 14px rgba(59,130,246,0.25)')}
           onMouseLeave={e => (e.currentTarget.style.boxShadow = 'none')}
         >
-          Account Currency: {settings.defaultCurrency || 'USD'}
+          {settings.defaultCurrency || 'USD'}
         </div>
       </div>
 
-      {/* Stat Cards Row 1 - High Level */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 18, marginBottom: 18 }}>
+      {/* Stat Cards Row 1 */}
+      <div className="stats-grid-1" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 18, marginBottom: 18 }}>
         <StatCard title="Total P&L" value={fmtCurrency(stats.totalProfitLoss)} subtitle={`${stats.totalTrades} Trades`}
           color={stats.totalProfitLoss >= 0 ? 'green' : 'red'} icon={stats.totalProfitLoss >= 0 ? <TrendingUp size={20} /> : <TrendingDown size={20} />} delay={0} />
         <StatCard title="Win Rate" value={`${stats.winRate}%`} subtitle={`${stats.wins}W / ${stats.losses}L`}
@@ -63,8 +63,8 @@ const Dashboard = ({ trades, stats, settings, onNavigate }) => {
           color={totalProfitDays >= totalLossDays ? 'green' : 'red'} icon={<Activity size={20} />} delay={180} />
       </div>
 
-      {/* Stat Cards Row 2 - Averages & Extrema */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 18, marginBottom: 36 }}>
+      {/* Stat Cards Row 2 */}
+      <div className="stats-grid-2" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 18, marginBottom: 36 }}>
         <StatCard title="Avg Win" value={fmtCurrency(stats.avgWin)} subtitle="Average profitable trade"
           color="green" icon={<Award size={20} />} delay={240} />
         <StatCard title="Avg Loss" value={fmtCurrency(stats.avgLoss)} subtitle="Average losing trade"
@@ -77,7 +77,7 @@ const Dashboard = ({ trades, stats, settings, onNavigate }) => {
 
       {/* Recent Trades */}
       <div className="glass-card" style={{ padding: 0, overflow: 'hidden' }}>
-        <div style={{
+        <div className="recent-header" style={{
           display: 'flex', alignItems: 'center', justifyContent: 'space-between',
           padding: '20px 24px', borderBottom: '1px solid var(--border-color)',
         }}>
@@ -85,7 +85,7 @@ const Dashboard = ({ trades, stats, settings, onNavigate }) => {
             <Clock size={16} color="var(--text-muted)" />
             <span style={{ fontWeight: 600, fontSize: 15 }}>Recent Performance</span>
           </div>
-          <div style={{ display: 'flex', gap: 10 }}>
+          <div className="recent-header-btns" style={{ display: 'flex', gap: 10 }}>
             <button className="btn-edit" onClick={() => onNavigate('add-trade')}>+ Add Trade</button>
             <button className="btn-edit" onClick={() => onNavigate('trades')}>View All</button>
           </div>
@@ -112,21 +112,21 @@ const Dashboard = ({ trades, stats, settings, onNavigate }) => {
               <tbody>
                 {recent.map(t => (
                   <tr key={t.id}>
-                    <td style={{ color: 'var(--text-secondary)', fontSize: 13 }}>
+                    <td data-label="Date" style={{ color: 'var(--text-secondary)', fontSize: 13 }}>
                       {format(new Date(t.date), 'dd MMM')}
                     </td>
-                    <td style={{ fontWeight: 600 }}>{t.pair}</td>
-                    <td>
+                    <td data-label="Pair" style={{ fontWeight: 600 }}>{t.pair}</td>
+                    <td data-label="Type">
                       <span className={`badge ${t.type === 'Buy' ? 'badge-buy' : 'badge-sell'}`}>
                         {t.type}
                       </span>
                     </td>
-                    <td>{t.entryPrice.toFixed(5)}</td>
-                    <td><span className="badge badge-lots">{t.lotSize}</span></td>
-                    <td style={{ fontWeight: 600, color: (t.riskReward || 0) >= 2 ? 'var(--accent-green)' : 'inherit' }}>
+                    <td data-label="Entry">{t.entryPrice.toFixed(5)}</td>
+                    <td data-label="Lots"><span className="badge badge-lots">{t.lotSize}</span></td>
+                    <td data-label="RR" style={{ fontWeight: 600, color: (t.riskReward || 0) >= 2 ? 'var(--accent-green)' : 'inherit' }}>
                         1:{t.riskReward || '—'}
                       </td>
-                    <td className={t.profitLoss >= 0 ? 'pnl-positive' : 'pnl-negative'}>
+                    <td data-label="P&L" className={t.profitLoss >= 0 ? 'pnl-positive' : 'pnl-negative'}>
                       {fmtCurrency(t.profitLoss)}
                     </td>
                   </tr>

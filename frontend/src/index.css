@@ -579,7 +579,301 @@ body {
   transition: width 0.4s, height 0.4s, opacity 0.6s;
 }
 
+/* ─── Calendar Grid ─── */
+.calendar-scroll-container {
+  overflow-x: auto;
+  border-radius: 12px;
+  background: rgba(255,255,255,0.02);
+  border: 1px solid rgba(255,255,255,0.05);
+}
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr) 130px;
+  background: rgba(255,255,255,0.05);
+  gap: 1px;
+  min-width: 800px; /* Default for desktop */
+}
+.calendar-header-cell {
+  padding: 12px 0;
+  font-size: 11px;
+  fontWeight: 800;
+  color: var(--text-muted);
+  textAlign: center;
+  letterSpacing: 0.1em;
+  background: var(--bg-card);
+  text-transform: uppercase;
+}
+.weekly-total-cell {
+  padding: 16px;
+  background: rgba(255,255,255,0.02);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  border-left: 1px solid rgba(255,255,255,0.05);
+}
+
 /* ─── Responsive ─── */
+
+/* Mobile topbar - hidden on desktop, shown on mobile */
+.mobile-topbar { display: none !important; }
+
+/* ── Tablet (≤ 1024px) ── */
+@media (max-width: 1024px) {
+  .sidebar { width: 200px; min-width: 200px; }
+  .stat-card { padding: 18px; }
+  .calendar-grid { min-width: 700px; }
+}
+
+/* ── Tablet / Small Desktop (≤ 768px) ── */
 @media (max-width: 768px) {
-  .sidebar { display: none; }
+  /* Hide sidebar by default, but show it when inside the mobile panel */
+  .sidebar { display: none !important; }
+  .sidebar-mobile-panel .sidebar { 
+    display: flex !important; 
+    width: 100% !important; 
+    min-width: 0 !important;
+    height: 100% !important;
+    animation: none !important; 
+    position: relative !important;
+    top: 0 !important;
+    border-right: none !important;
+  }
+  .mobile-topbar { display: flex !important; }
+
+  /* Page padding */
+  .page-content { padding: 18px 14px !important; }
+
+  /* Page title size */
+  .page-title { font-size: 22px !important; }
+
+  /* Calendar Grid on Tablet */
+  .calendar-grid { 
+    grid-template-columns: repeat(7, 1fr); 
+    min-width: 0; 
+  }
+  .weekly-total-col { display: none !important; }
+
+  /* Stat grids: 2 columns on tablet */
+  .stats-grid-1, .stats-grid-2 {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+
+  /* Analytics grid: single column */
+  .analytics-charts-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Filter bar: wrap */
+  .filter-bar { flex-wrap: wrap; }
+  .filter-chip { min-width: 0; width: 100%; }
+  .search-input { min-width: 0; width: 100%; }
+
+  /* Modal: full screen on mobile */
+  .modal-overlay { padding: 0 !important; align-items: flex-end !important; }
+  .modal-box {
+    border-radius: 20px 20px 0 0 !important;
+    margin: 0 !important;
+    max-width: 100% !important;
+    max-height: 92vh;
+    overflow-y: auto;
+  }
+
+  /* Trade table → Premium Collapsible Grid Card */
+  .trade-table, .trade-table thead, .trade-table tbody,
+  .trade-table th, .trade-table td, .trade-table tr {
+    display: block;
+  }
+  .trade-table thead { display: none; }
+  .trade-table tbody tr {
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 16px;
+    margin-bottom: 12px;
+    padding: 14px;
+    background: linear-gradient(145deg, rgba(30, 41, 59, 0.4) 0%, rgba(15, 23, 42, 0.5) 100%);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 0;
+    animation: fadeIn 0.3s ease both;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  .trade-table tbody tr:has(.badge-buy) { border-left: 3px solid #10b981; }
+  .trade-table tbody tr:has(.badge-sell) { border-left: 3px solid #ef4444; }
+
+  .trade-table td {
+    border-bottom: none;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+  }
+
+  /* Labels */
+  .trade-table td::before {
+    content: attr(data-label);
+    font-size: 8px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-muted);
+    opacity: 0.6;
+  }
+
+  /* Summary Row (Always Visible) */
+  .trade-table td[data-label="Pair"] { width: 50%; font-size: 16px; font-weight: 800; color: white; }
+  .trade-table td[data-label="Type"] { width: 30%; align-items: flex-start; }
+  .trade-table td[data-label="Type"]::before { display: none; }
+  
+  .trade-table td[data-label="P&L"] { width: 20%; align-items: flex-end; font-size: 15px; font-weight: 800; }
+  .trade-table td[data-label="P&L"]::before { display: none; }
+
+  .trade-table td[data-label="Date"] { width: 100%; margin-top: 4px; font-size: 10px; color: var(--text-muted); }
+
+  /* Detail Toggle Button */
+  .mobile-detail-toggle {
+    display: flex !important;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 8px;
+    color: var(--accent-blue);
+    padding: 6px 10px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .row-expanded .mobile-detail-toggle {
+    background: var(--accent-blue);
+    color: white;
+    transform: rotate(180deg);
+  }
+
+  /* Hidden Details by Default */
+  .mobile-hide-detail {
+    display: none !important;
+    width: 33.33%;
+    margin-top: 14px;
+    padding-top: 10px;
+    border-top: 1px dashed rgba(255,255,255,0.05);
+  }
+  .action-btns-desktop { display: none !important; }
+
+  /* Expanded State */
+  .row-expanded .mobile-hide-detail {
+    display: flex !important;
+  }
+  .row-expanded .action-btns-desktop {
+    display: flex !important;
+    width: 100%;
+    margin-top: 16px;
+    padding-top: 12px;
+    border-top: 1px solid rgba(255,255,255,0.08);
+    justify-content: flex-end;
+    gap: 10px;
+  }
+  .row-expanded td[data-label="Actions"] { width: 100%; }
+  .row-expanded td[data-label="Actions"]::before { display: none; }
+
+  /* Adjustments for better alignment in grid */
+  .row-expanded td[data-label="Lots"],
+  .row-expanded td[data-label="RR"],
+  .row-expanded td[data-label="Pips"] {
+    font-weight: 600;
+    color: #cbd5e1;
+  }
+
+  /* AI Chat: full-width on mobile */
+  .ai-chat-panel {
+    width: calc(100vw - 32px) !important;
+    right: 16px !important;
+    bottom: 16px !important;
+    height: 75vh !important;
+  }
+
+  /* Form grid: single column on mobile */
+  .form-grid-2 { grid-template-columns: 1fr !important; }
+
+  /* ConnectMT5 grid */
+  .connect-mt5-grid { grid-template-columns: 1fr !important; }
+
+  /* Analytics summary pills wrap */
+  .analytics-pills { flex-wrap: wrap; }
+  .analytics-pill { flex: 1 1 calc(50% - 6px); min-width: 140px; }
+
+  /* Dashboard header: stack on mobile */
+  .dashboard-header { flex-direction: column !important; align-items: flex-start !important; gap: 12px !important; }
+
+  /* Settings currency grid: 2 cols */
+  .currency-grid { grid-template-columns: repeat(2, 1fr) !important; }
+
+  /* Stat card: don't scale on hover (avoids layout jank on touch) */
+  .stat-card:hover { transform: none; box-shadow: 0 8px 24px rgba(0,0,0,0.3); }
+  /* Stat value font size */
+  .stat-value { font-size: 22px !important; }
+}
+
+/* ── Mobile (≤ 480px) ── */
+@media (max-width: 480px) {
+  /* 1-column stat grid */
+  .stats-grid-1, .stats-grid-2 {
+    grid-template-columns: 1fr !important;
+  }
+  .analytics-pill { flex: 1 1 100%; }
+  .stat-card { padding: 16px; }
+
+  /* Tighter page padding */
+  .page-content { padding: 16px 12px !important; }
+
+  /* Calendar cells smaller */
+  .calendar-day { padding: 8px !important; }
+
+  /* Full-width buttons in filter */
+  .filter-actions { flex-direction: column !important; }
+  .filter-actions button { width: 100%; }
+
+  /* Mobile AI chat smaller */
+  .ai-chat-panel {
+    width: calc(100vw - 24px) !important;
+    right: 12px !important;
+    bottom: 12px !important;
+    height: 80vh !important;
+  }
+
+  /* Dashboard recent trades header stack */
+  .recent-header {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 10px !important;
+  }
+  .recent-header-btns { width: 100%; display: flex; gap: 8px; }
+  .recent-header-btns button { flex: 1; }
+
+  /* Trade form calcs: single col */
+  .calc-grid { grid-template-columns: 1fr !important; }
+
+  /* Settings data management: stack */
+  .settings-data-btns { flex-direction: column !important; }
+  .settings-data-btns button { width: 100%; }
+}
+
+/* ── Sidebar mobile overlay ── */
+.sidebar-mobile-overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.6); /* Slightly more transparent */
+  backdrop-filter: blur(2px); /* Less blur */
+  z-index: 100;
+  animation: fadeIn 0.2s ease;
+}
+.sidebar-mobile-panel {
+  position: fixed; left: 0; top: 0; bottom: 0;
+  width: 260px;
+  background: linear-gradient(180deg, #0c1322 0%, #0a0f1e 100%);
+  border-right: 1px solid rgba(255,255,255,0.06);
+  z-index: 101;
+  overflow-y: auto;
+  animation: fadeInLeft 0.25s cubic-bezier(0.22,1,0.36,1);
+  display: flex; flex-direction: column;
 }

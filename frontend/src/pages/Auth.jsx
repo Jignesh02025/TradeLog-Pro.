@@ -33,9 +33,9 @@ const Auth = () => {
   return (
     <div style={{ 
       minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', 
-      background: 'var(--bg-primary)', padding: 20 
+      background: 'var(--bg-primary)', padding: '20px 16px'
     }}>
-      <div className="glass-card fade-in" style={{ maxWidth: 400, width: '100%', padding: 40 }}>
+      <div className="glass-card fade-in" style={{ maxWidth: 400, width: '100%', padding: 'clamp(24px, 8vw, 40px)' }}>
         {/* Logo */}
         <div style={{ textAlign: 'center', marginBottom: 32 }}>
           <div style={{

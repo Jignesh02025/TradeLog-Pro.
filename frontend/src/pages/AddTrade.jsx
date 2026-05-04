@@ -21,7 +21,7 @@ const AddTrade = ({ onAdd }) => {
   }
 
   return (
-    <div style={{ padding: '32px 36px', maxWidth: 800 }}>
+    <div className="page-content" style={{ padding: '32px 36px', maxWidth: 800 }}>
       <div className="fade-in" style={{ marginBottom: 28 }}>
         <h1 className="page-title" style={{ fontSize: 26, fontWeight: 800, letterSpacing: '-0.03em' }}>
           Log a <span className="gradient-text">Trade</span>
